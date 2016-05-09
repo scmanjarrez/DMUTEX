@@ -1,0 +1,16 @@
+OS=$(shell uname -s)
+
+CC=cc
+LD=ld
+AR=ar 
+RANLIB=ranlib
+
+INCLUDE=
+DEFINE=
+LIBDIR=
+
+CFLAGS =-Wall -g $(INCLUDE) $(DEFINE)
+ARFLAGS=
+LDFLAGS=$(CFLAGS) $(LIBDIR)
+
+LIB=-lpthread

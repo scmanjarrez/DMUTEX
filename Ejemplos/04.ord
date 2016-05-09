@@ -1,0 +1,17 @@
+# Ejemplo de un semaforo entre dos procesos (bloqueo).
+# Procesos: P0,p1
+P0: GETCLOCK
+P1: GETCLOCK
+P0: LOCK S
+P1: LOCK S
+P1: RECEIVE
+P1: EVENT
+P0: GETCLOCK
+P0: RECEIVE
+P0: RECEIVE
+P0: UNLOCK S
+P1: RECEIVE
+P1: EVENT
+P1: UNLOCK S
+P0: GETCLOCK
+P1: GETCLOCK

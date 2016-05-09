@@ -1,0 +1,67 @@
+# Ejemplo con multiples semaforos
+# Procesos: A,B,C,D
+# Semaforos: X,Y
+A: EVENT
+B: EVENT
+B: EVENT
+C: EVENT
+D: EVENT
+A: GETCLOCK
+B: GETCLOCK
+C: GETCLOCK
+D: GETCLOCK
+# Los procesos A y B intentan cerrar X e Y, respectivamente
+A: LOCK X
+B: LOCK Y
+# Todos reciben las peticiones
+B: RECEIVE
+C: RECEIVE
+D: RECEIVE
+A: RECEIVE
+C: RECEIVE
+D: RECEIVE
+# Tanto A como B deben recibir los 3 OKs
+A: RECEIVE
+A: RECEIVE
+A: RECEIVE
+# A cierra X
+B: RECEIVE
+B: RECEIVE
+B: RECEIVE
+# B cierra Y
+A: EVENT
+B: EVENT
+# Ahora liberamos X E Y
+A: UNLOCK X
+B: UNLOCK Y
+################################
+# REPETIMOS LO MISMO CON C Y D #
+################################
+C: LOCK Y
+D: LOCK X
+# Todos reciben las peticiones
+C: RECEIVE
+B: RECEIVE
+A: RECEIVE
+D: RECEIVE
+B: RECEIVE
+A: RECEIVE
+# Tanto C como D deben recibir los 3 OKs
+D: RECEIVE
+D: RECEIVE
+D: RECEIVE
+# D cierra X
+C: RECEIVE
+C: RECEIVE
+C: RECEIVE
+# C cierra Y
+D: EVENT
+C: EVENT
+# Ahora liberamos X E Y
+D: UNLOCK X
+C: UNLOCK Y
+# Terminando ¿Valores de LCs?
+A: GETCLOCK
+B: GETCLOCK
+C: GETCLOCK
+D: GETCLOCK

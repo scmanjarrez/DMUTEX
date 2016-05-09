@@ -1,0 +1,24 @@
+PROCESO: A: 1217
+PROCESO: B: 1218
+PROCESO: C: 1219
+# Ejemplo sencillo de ordenes y mensajes
+# Procesos: A, B, C
+A: [EVENT]-> A{TICK} B{--} C{--}
+B: [EVENT]-> A{--} B{TICK} C{--}
+C: [EVENT]-> A{--} B{--} C{TICK}
+A: [MESSAGETO B]-> A{TICK|SEND(MSG,B)} B{--} C{--}
+B: [EVENT]-> A{--} B{TICK} C{--}
+B: [RECEIVE]-> A{--} B{RECEIVE(MSG,A)|TICK} C{--}
+A: [MESSAGETO C]-> A{TICK|SEND(MSG,C)} B{--} C{--}
+C: [RECEIVE]-> A{--} B{--} C{RECEIVE(MSG,A)|TICK}
+C: [MESSAGETO A]-> A{--} B{--} C{TICK|SEND(MSG,A)}
+B: [MESSAGETO A]-> A{--} B{TICK|SEND(MSG,A)} C{--}
+A: [RECEIVE]-> A{RECEIVE(MSG,C)|TICK} B{--} C{--}
+A: [GETCLOCK]-> A{LC[4,0,3]} B{--} C{--}
+A: [RECEIVE]-> A{RECEIVE(MSG,B)|TICK} B{--} C{--}
+A: [GETCLOCK]-> A{LC[5,4,3]} B{--} C{--}
+B: [GETCLOCK]-> A{--} B{LC[2,4,0]} C{--}
+C: [GETCLOCK]-> A{--} B{--} C{LC[3,0,3]}
+FINISH[15046]
+FINISH[15047]
+FINISH[15048]

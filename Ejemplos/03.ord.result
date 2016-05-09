@@ -1,0 +1,16 @@
+PROCESO: P0: 1219
+PROCESO: P1: 1220
+# Ejemplo de un semaforo entre dos procesos
+# Procesos: P0,p1
+P0: [GETCLOCK]-> P0{LC[0,0]} P1{--}
+P1: [GETCLOCK]-> P0{--} P1{LC[0,0]}
+P0: [LOCK S]-> P0{TICK|SEND(LOCK,P1)} P1{--}
+P1: [RECEIVE]-> P0{--} P1{RECEIVE(LOCK,P0)|TICK|TICK|SEND(OK,P0)}
+P1: [EVENT]-> P0{--} P1{TICK}
+P0: [RECEIVE]-> P0{RECEIVE(OK,P1)|TICK|MUTEX(S)} P1{--}
+P0: [UNLOCK S]-> P0{--} P1{--}
+P1: [EVENT]-> P0{--} P1{TICK}
+P0: [GETCLOCK]-> P0{LC[2,2]} P1{--}
+P1: [GETCLOCK]-> P0{--} P1{LC[1,4]}
+FINISH[15052]
+FINISH[15053]
