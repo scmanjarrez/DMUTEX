@@ -9,7 +9,7 @@ int myIndex;
 char crit_sect[80];
 MUTEX *locks;
 int n_locks;
-char prueba[80];
+/* char prueba[80]; */
 
 int main(int argc, char* argv[])
 {
@@ -65,8 +65,8 @@ int main(int argc, char* argv[])
       if(!strcmp(proc,argv[1]))
 	{
 	  myIndex = n_peers;
-	  printf("%s-%s: myIndex es %d\n", proc, argv[1], myIndex);
-	  strcpy(prueba, proc);
+	  /* printf("%s-%s: myIndex es %d\n", proc, argv[1], myIndex); */
+	  /* strcpy(prueba, proc); */
 	}
 
       if(store_peer_sckt(proc, port)==-1)
@@ -171,9 +171,11 @@ int main(int argc, char* argv[])
 		    }
 		  else
 		    {
-		      
-		      if(!amIOlder(locks[lockIndex].req_lclk, pname))
-			{	
+		      printf("me han pedido el lock %s y yo tengo lock.req=%d\n", msg->idLock, locks[lockIndex].req);
+		      /* if(!amIOlder(locks[lockIndex].req_lclk, pname)) */
+		      if(amIOlder(locks[lockIndex].req_lclk, pname)==0)
+			{
+			  printf("enserio he entrado? wtf!\n");
 			  if(sendOkLockRequest(&info, pname, msg->idLock)==-1)
 			    {
 			      fprintf(stderr, "No se ha podido enviar OK a \"%s\"", pname);
@@ -620,19 +622,23 @@ int addToQueue(const char *idLock, const char* idPeer)
 
 int amIOlder(const int *reqLClk, const char *id)
 {
-  printf("soy %s y estoy comprobando si soy mayor\n", prueba);
-  int j;
-  for (j = 0; j<n_peers; j++)
-    {
-      printf("indice=%d, mioAntiguo=%d, mioActual=%d\n", j, reqLClk[j], lclk[j]);
-    }
+  /* printf("soy %s y estoy comprobando si soy mayor\n", prueba); */
+  /* int j; */
+  /* for (j = 0; j<n_peers; j++) */
+  /*   { */
+  /*     printf("indice=%d, mioAntiguo=%d, mioActual=%d\n", j, reqLClk[j], lclk[j]); */
+  /*   } */
   int i;
   for (i = 0; i<n_peers; i++)
     {
       if(reqLClk[i]>lclk[i])
 	{
 	  return 0;
-	}    
+	}
+      if(reqLClk[i]<lclk[i])
+	{
+	  return 1;
+	}
     }
 
   int pIndex;
@@ -682,7 +688,7 @@ int add_lock(const INFO_SCKT *info, const char *id)
       fprintf(stderr, "Ya se ha hecho una petición del lock %s anteriormente\n", id);
       return -1;
     }
-
+  
   /* Lo añadimos a la lista de temas */
   strcpy(locks[n_locks].id, id);
   locks[n_locks].req = true;
@@ -693,6 +699,10 @@ int add_lock(const INFO_SCKT *info, const char *id)
       fprintf(stderr, "Error al reservar memoria para reloj lógico antiguo de lock \"%s\"\n", id);
       return -1;
     }
+
+  /* Se genera un evento */
+  lclk[myIndex]++;
+  printf("%s: TICK\n", peers[myIndex].id);
 
   int i;
   for(i=0; i<n_peers;i++)
@@ -709,10 +719,6 @@ int add_lock(const INFO_SCKT *info, const char *id)
       fprintf(stderr, "Error al reservar espacio extra para nuevo lock\n");
       return -1;
     }
-
-  /* Se genera un evento */
-  lclk[myIndex]++;
-  printf("%s: TICK\n", peers[myIndex].id);
     
   /* Y se envia el reloj lógico a todos los procesos */
   UDP_MSG msg;
