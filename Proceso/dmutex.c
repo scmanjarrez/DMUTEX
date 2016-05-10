@@ -9,6 +9,7 @@ int myIndex;
 char crit_sect[80];
 MUTEX *locks;
 int n_locks;
+char prueba[80];
 
 int main(int argc, char* argv[])
 {
@@ -63,7 +64,9 @@ int main(int argc, char* argv[])
       sscanf(line,"%[^:]: %d",proc,&port);
       if(!strcmp(proc,argv[1]))
 	{
-	  myIndex = n_peers;	  
+	  myIndex = n_peers;
+	  printf("%s-%s: myIndex es %d\n", proc, argv[1], myIndex);
+	  strcpy(prueba, proc);
 	}
 
       if(store_peer_sckt(proc, port)==-1)
@@ -81,6 +84,10 @@ int main(int argc, char* argv[])
       free(peers);
       return -1;
     }
+  /* int i; */
+  /* for (i = 0; i < n_peers; i++) { */
+  /*   printf("indice=%d, id=%s, puerto=%d\n", i, peers[i].id, peers[i].port); */
+  /* } */
   
   /* Inicializar Reloj */
   if(init_lclk()==-1)
@@ -151,9 +158,21 @@ int main(int argc, char* argv[])
 		}
 	      else
 		{
-		  if (locks[lockIndex].req)
+		  if (locks[lockIndex].inside)
 		    {
-		      if(!amIOlder(locks[lockIndex].req_lclk, msg->lclk, pname) && !locks[lockIndex].inside)
+		      if(addToQueue(msg->idLock, pname)==-1)
+			{
+			  fprintf(stderr, "No se ha podido añadir a \"%s\" a la cola del lock \"%s\"", pname, msg->idLock);
+			  free(msg);
+			  free(lclk);
+			  free(peers);
+			  return -1;
+			}
+		    }
+		  else
+		    {
+		      
+		      if(!amIOlder(locks[lockIndex].req_lclk, pname))
 			{	
 			  if(sendOkLockRequest(&info, pname, msg->idLock)==-1)
 			    {
@@ -164,7 +183,7 @@ int main(int argc, char* argv[])
 			      return -1;
 			    }
 			}
-		      else 
+		      else
 			{
 			  if(addToQueue(msg->idLock, pname)==-1)
 			    {
@@ -176,6 +195,29 @@ int main(int argc, char* argv[])
 			    }
 			}
 		    }
+		  
+		  /* if(!amIOlder(locks[lockIndex].req_lclk, msg->lclk, pname) && !locks[lockIndex].inside) */
+		  /*   {	 */
+		  /*     if(sendOkLockRequest(&info, pname, msg->idLock)==-1) */
+		  /* 	{ */
+		  /* 	  fprintf(stderr, "No se ha podido enviar OK a \"%s\"", pname); */
+		  /* 	  free(msg); */
+		  /* 	  free(lclk); */
+		  /* 	  free(peers); */
+		  /* 	  return -1; */
+		  /* 	} */
+		  /*   } */
+		  /* else  */
+		  /*   { */
+		  /*     if(addToQueue(msg->idLock, pname)==-1) */
+		  /* 	{ */
+		  /* 	  fprintf(stderr, "No se ha podido añadir a \"%s\" a la cola del lock \"%s\"", pname, msg->idLock); */
+		  /* 	  free(msg); */
+		  /* 	  free(lclk); */
+		  /* 	  free(peers); */
+		  /* 	  return -1; */
+		  /* 	} */
+		  /*   } */
 		}
 	      break;
 	    case OK:
@@ -576,12 +618,18 @@ int addToQueue(const char *idLock, const char* idPeer)
   return 0;
 }
 
-int amIOlder(const int *myLClk, const int *hisLClk, const char *id)
+int amIOlder(const int *reqLClk, const char *id)
 {
+  printf("soy %s y estoy comprobando si soy mayor\n", prueba);
+  int j;
+  for (j = 0; j<n_peers; j++)
+    {
+      printf("indice=%d, mioAntiguo=%d, mioActual=%d\n", j, reqLClk[j], lclk[j]);
+    }
   int i;
   for (i = 0; i<n_peers; i++)
     {
-      if(myLClk[i]>hisLClk[i])
+      if(reqLClk[i]>lclk[i])
 	{
 	  return 0;
 	}    
@@ -593,6 +641,7 @@ int amIOlder(const int *myLClk, const int *hisLClk, const char *id)
       fprintf(stderr, "El proceso con id \"%s\" no se ha encontrado\n", id);
       return -1;
     }
+  /* printf("mi index es %d y el del otro es %d\n", myIndex, pIndex); */
   return myIndex>pIndex? 0:1;
 }
 

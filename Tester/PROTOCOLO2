@@ -1,0 +1,27 @@
+# Procesos intercambian mensajes entre sí
+# Procolo 2cliente-servidor
+SRV: GETCLOCK
+CL1: GETCLOCK
+CL2: GETCLOCK
+# Petición y respuesta del primer cliente
+CL1: EVENT
+CL1: MESSAGETO SRV
+SRV: RECEIVE
+SRV: EVENT
+SRV: EVENT
+SRV: MESSAGETO CL1
+CL1: RECEIVE
+CL1: EVENT
+# El segundo cliente hace lo mismo
+CL2: EVENT
+CL2: MESSAGETO SRV
+SRV: RECEIVE
+SRV: EVENT
+SRV: EVENT
+SRV: MESSAGETO CL2
+CL2: RECEIVE
+CL2: EVENT
+# Y termina
+SRV: GETCLOCK
+CL1: GETCLOCK
+CL2: GETCLOCK

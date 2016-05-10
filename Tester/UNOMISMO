@@ -1,0 +1,9 @@
+# Procesos intercambian mensajes entre sí
+# Un proceso
+ALONE: EVENT
+ALONE: EVENT
+ALONE: EVENT
+ALONE: GETCLOCK
+ALONE: MESSAGETO ALONE
+ALONE: RECEIVE
+ALONE: GETCLOCK

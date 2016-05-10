@@ -1,0 +1,7 @@
+# Procesos intercambian mensajes entre si
+# Procolo cerrojo sencillo
+A: [LOCK CERROJO]-> A{TICK|SEND(LOCK,B)} B{--}
+B: [RECEIVE]-> A{--} B{RECEIVE(LOCK,A)|TICK|TICK|SEND(OK,A)}
+A: [RECEIVE]-> A{RECEIVE(OK,B)|TICK|MUTEX(CERROJO)} B{--}
+# A tiene el cerrojo
+A: [UNLOCK CERROJO]-> A{--} B{--}

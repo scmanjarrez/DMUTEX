@@ -1,0 +1,12 @@
+A: [MESSAGETO B]-> A{TICK|SEND(MSG,B)} B{--} C{--}
+A: [MESSAGETO C]-> A{TICK|SEND(MSG,C)} B{--} C{--}
+B: [LOCK SEM]-> A{--} B{TICK|SEND(LOCK,A)|SEND(LOCK,C)} C{--}
+C: [RECEIVE]-> A{--} B{--} C{RECEIVE(MSG,A)|TICK}
+A: [RECEIVE]-> A{RECEIVE(LOCK,B)|TICK|TICK|SEND(OK,B)} B{--} C{--}
+C: [RECEIVE]-> A{--} B{--} C{RECEIVE(LOCK,B)|TICK|TICK|SEND(OK,B)}
+# Se reciben MSG(A), OK(A) y OK(C)
+B: [RECEIVE]-> A{--} B{RECEIVE(MSG,A)|TICK} C{--}
+B: [RECEIVE]-> A{--} B{RECEIVE(OK,A)|TICK} C{--}
+B: [RECEIVE]-> A{--} B{RECEIVE(OK,C)|TICK|MUTEX(SEM)} C{--}
+B: [EVENT]-> A{--} B{TICK} C{--}
+B: [UNLOCK SEM]-> A{--} B{--} C{--}

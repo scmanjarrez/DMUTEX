@@ -1,0 +1,25 @@
+# El semáforo SEM protege una región crítica 
+# entre cuatro procesos. El proceso D tarda en
+# recibir los mensajes.
+A: EVENT
+A: LOCK SEM
+B: RECEIVE
+C: RECEIVE
+A: RECEIVE
+A: RECEIVE
+B: EVENT
+B: MESSAGETO C
+C: RECEIVE
+C: EVENT
+C: EVENT
+D: RECEIVE
+A: RECEIVE
+A: EVENT
+A: EVENT
+A: EVENT
+A: UNLOCK SEM
+B: EVENT
+A: GETCLOCK
+B: GETCLOCK
+C: GETCLOCK
+D: GETCLOCK

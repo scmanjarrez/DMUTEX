@@ -1,0 +1,6 @@
+# Ejemplo sencillo de ordenes
+# Un proceso
+ALONE: EVENT
+ALONE: EVENT
+ALONE: EVENT
+ALONE: GETCLOCK

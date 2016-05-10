@@ -1,0 +1,20 @@
+# Procesos intercambian mensajes entre sí
+# Procolo cliente-servidor
+SRV: GETCLOCK
+CLI: GETCLOCK
+# El cliente procesa un dato
+CLI: EVENT
+# Ahora el cliente necesita solicitar una
+# operación
+CLI: MESSAGETO SRV
+SRV: RECEIVE
+# El servidor lo procesa
+SRV: EVENT
+SRV: EVENT
+# y transmite respuesta
+SRV: MESSAGETO CLI
+CLI: RECEIVE
+CLI: EVENT
+# Y termina
+SRV: GETCLOCK
+CLI: GETCLOCK

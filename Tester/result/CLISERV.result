@@ -1,0 +1,17 @@
+# El servidor es un recurso compartido, pero
+# sólo hay un cliente que lo solicite.
+# El semáforo que protege al servidor se denomina L
+CLI: [EVENT]-> CLI{TICK} SRV{--}
+# Antes de solicitar el servicio pide el semáforo
+CLI: [LOCK L]-> CLI{TICK|SEND(LOCK,SRV)} SRV{--}
+SRV: [RECEIVE]-> CLI{--} SRV{RECEIVE(LOCK,CLI)|TICK|TICK|SEND(OK,CLI)}
+CLI: [RECEIVE]-> CLI{RECEIVE(OK,SRV)|TICK|MUTEX(L)} SRV{--}
+CLI: [MESSAGETO SRV]-> CLI{TICK|SEND(MSG,SRV)} SRV{--}
+SRV: [RECEIVE]-> CLI{--} SRV{RECEIVE(MSG,CLI)|TICK}
+SRV: [EVENT]-> CLI{--} SRV{TICK}
+SRV: [MESSAGETO CLI]-> CLI{--} SRV{TICK|SEND(MSG,CLI)}
+CLI: [RECEIVE]-> CLI{RECEIVE(MSG,SRV)|TICK} SRV{--}
+# Ahora se libera el cerrojo.
+CLI: [UNLOCK L]-> CLI{--} SRV{--}
+CLI: [GETCLOCK]-> CLI{LC[5,5]} SRV{--}
+SRV: [GETCLOCK]-> CLI{--} SRV{LC[4,5]}

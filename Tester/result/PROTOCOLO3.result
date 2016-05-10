@@ -1,0 +1,31 @@
+# Procesos intercambian mensajes entre sí
+# Procolo cliente-proxy-oservidor
+CLI: [GETCLOCK]-> CLI{LC[0,0,0]} PROXY{--} SRV{--}
+PROXY: [GETCLOCK]-> CLI{--} PROXY{LC[0,0,0]} SRV{--}
+SRV: [GETCLOCK]-> CLI{--} PROXY{--} SRV{LC[0,0,0]}
+# [1] La primera petición no está en el
+#     proxy y éste la retransmite al servidor
+CLI: [EVENT]-> CLI{TICK} PROXY{--} SRV{--}
+CLI: [MESSAGETO PROXY]-> CLI{TICK|SEND(MSG,PROXY)} PROXY{--} SRV{--}
+PROXY: [RECEIVE]-> CLI{--} PROXY{RECEIVE(MSG,CLI)|TICK} SRV{--}
+PROXY: [EVENT]-> CLI{--} PROXY{TICK} SRV{--}
+# NO ESTÁ
+PROXY: [MESSAGETO SRV]-> CLI{--} PROXY{TICK|SEND(MSG,SRV)} SRV{--}
+SRV: [RECEIVE]-> CLI{--} PROXY{--} SRV{RECEIVE(MSG,PROXY)|TICK}
+SRV: [MESSAGETO PROXY]-> CLI{--} PROXY{--} SRV{TICK|SEND(MSG,PROXY)}
+PROXY: [RECEIVE]-> CLI{--} PROXY{RECEIVE(MSG,SRV)|TICK} SRV{--}
+PROXY: [MESSAGETO CLI]-> CLI{--} PROXY{TICK|SEND(MSG,CLI)} SRV{--}
+CLI: [RECEIVE]-> CLI{RECEIVE(MSG,PROXY)|TICK} PROXY{--} SRV{--}
+# [2] La segunda petición si está en el
+#     proxy (respuesta directa).
+CLI: [EVENT]-> CLI{TICK} PROXY{--} SRV{--}
+CLI: [MESSAGETO PROXY]-> CLI{TICK|SEND(MSG,PROXY)} PROXY{--} SRV{--}
+PROXY: [RECEIVE]-> CLI{--} PROXY{RECEIVE(MSG,CLI)|TICK} SRV{--}
+PROXY: [EVENT]-> CLI{--} PROXY{TICK} SRV{--}
+# SI ESTÁ
+PROXY: [MESSAGETO CLI]-> CLI{--} PROXY{TICK|SEND(MSG,CLI)} SRV{--}
+CLI: [RECEIVE]-> CLI{RECEIVE(MSG,PROXY)|TICK} PROXY{--} SRV{--}
+# FIN
+CLI: [GETCLOCK]-> CLI{LC[6,8,2]} PROXY{--} SRV{--}
+PROXY: [GETCLOCK]-> CLI{--} PROXY{LC[5,8,2]} SRV{--}
+SRV: [GETCLOCK]-> CLI{--} PROXY{--} SRV{LC[2,3,2]}

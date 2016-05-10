@@ -1,0 +1,27 @@
+# Procesos intercambian mensajes entre sí
+# Procolo 2cliente-servidor
+SRV: [GETCLOCK]-> SRV{LC[0,0,0]} CL1{--} CL2{--}
+CL1: [GETCLOCK]-> SRV{--} CL1{LC[0,0,0]} CL2{--}
+CL2: [GETCLOCK]-> SRV{--} CL1{--} CL2{LC[0,0,0]}
+# Petición y respuesta del primer cliente
+CL1: [EVENT]-> SRV{--} CL1{TICK} CL2{--}
+CL1: [MESSAGETO SRV]-> SRV{--} CL1{TICK|SEND(MSG,SRV)} CL2{--}
+SRV: [RECEIVE]-> SRV{RECEIVE(MSG,CL1)|TICK} CL1{--} CL2{--}
+SRV: [EVENT]-> SRV{TICK} CL1{--} CL2{--}
+SRV: [EVENT]-> SRV{TICK} CL1{--} CL2{--}
+SRV: [MESSAGETO CL1]-> SRV{TICK|SEND(MSG,CL1)} CL1{--} CL2{--}
+CL1: [RECEIVE]-> SRV{--} CL1{RECEIVE(MSG,SRV)|TICK} CL2{--}
+CL1: [EVENT]-> SRV{--} CL1{TICK} CL2{--}
+# El segundo cliente hace lo mismo
+CL2: [EVENT]-> SRV{--} CL1{--} CL2{TICK}
+CL2: [MESSAGETO SRV]-> SRV{--} CL1{--} CL2{TICK|SEND(MSG,SRV)}
+SRV: [RECEIVE]-> SRV{RECEIVE(MSG,CL2)|TICK} CL1{--} CL2{--}
+SRV: [EVENT]-> SRV{TICK} CL1{--} CL2{--}
+SRV: [EVENT]-> SRV{TICK} CL1{--} CL2{--}
+SRV: [MESSAGETO CL2]-> SRV{TICK|SEND(MSG,CL2)} CL1{--} CL2{--}
+CL2: [RECEIVE]-> SRV{--} CL1{--} CL2{RECEIVE(MSG,SRV)|TICK}
+CL2: [EVENT]-> SRV{--} CL1{--} CL2{TICK}
+# Y termina
+SRV: [GETCLOCK]-> SRV{LC[8,2,2]} CL1{--} CL2{--}
+CL1: [GETCLOCK]-> SRV{--} CL1{LC[4,4,0]} CL2{--}
+CL2: [GETCLOCK]-> SRV{--} CL1{--} CL2{LC[8,2,4]}

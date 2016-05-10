@@ -1,0 +1,11 @@
+A: LOCK CERROJO
+B: RECEIVE
+# B Solicita el cerrojo
+B: LOCK CERROJO
+A: RECEIVE
+A: RECEIVE
+# A tiene el cerrojo
+A: UNLOCK CERROJO
+B: RECEIVE
+# B tiene el cerrojo
+B: UNLOCK CERROJO

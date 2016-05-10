@@ -79,7 +79,7 @@ int getPeerIndex(const char *idPeer);
 /* Obtiene el índice de cerrojo de un id de cerrojo dado */
 int getLockIndex(const char *idLock);
 /* Devuelve 0 si el reloj del argumento 1 es mayor que el del argumento 2 */
-int amIOlder(const int *myLClk, const int *hisLClk, const char *id);
+int amIOlder(const int *reqLClk, const char *id);
 /* Añade un cerrojo a la lista de cerrojos */
 int add_lock(const INFO_SCKT *info, const char *id);
 /* Elimina un cerrojo de la lista de cerrojos */

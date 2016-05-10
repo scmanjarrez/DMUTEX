@@ -1,0 +1,18 @@
+# Ejemplo sencillo de ordenes
+# Cuatro proceso
+N: [GETCLOCK]-> N{LC[0,0,0,0]} S{--} E{--} W{--}
+S: [GETCLOCK]-> N{--} S{LC[0,0,0,0]} E{--} W{--}
+E: [GETCLOCK]-> N{--} S{--} E{LC[0,0,0,0]} W{--}
+W: [GETCLOCK]-> N{--} S{--} E{--} W{LC[0,0,0,0]}
+N: [EVENT]-> N{TICK} S{--} E{--} W{--}
+S: [EVENT]-> N{--} S{TICK} E{--} W{--}
+N: [EVENT]-> N{TICK} S{--} E{--} W{--}
+S: [EVENT]-> N{--} S{TICK} E{--} W{--}
+N: [EVENT]-> N{TICK} S{--} E{--} W{--}
+S: [EVENT]-> N{--} S{TICK} E{--} W{--}
+N: [GETCLOCK]-> N{LC[3,0,0,0]} S{--} E{--} W{--}
+S: [GETCLOCK]-> N{--} S{LC[0,3,0,0]} E{--} W{--}
+E: [EVENT]-> N{--} S{--} E{TICK} W{--}
+W: [EVENT]-> N{--} S{--} E{--} W{TICK}
+E: [GETCLOCK]-> N{--} S{--} E{LC[0,0,1,0]} W{--}
+W: [GETCLOCK]-> N{--} S{--} E{--} W{LC[0,0,0,1]}

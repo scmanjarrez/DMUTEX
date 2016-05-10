@@ -1,0 +1,6 @@
+# Ejemplo sencillo de ordenes
+# Un proceso
+ALONE: [EVENT]-> ALONE{TICK}
+ALONE: [EVENT]-> ALONE{TICK}
+ALONE: [EVENT]-> ALONE{TICK}
+ALONE: [GETCLOCK]-> ALONE{LC[3]}
