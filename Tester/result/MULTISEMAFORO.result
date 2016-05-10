@@ -38,14 +38,14 @@ B: [UNLOCK S3]-> A{--} B{--} C{--}
 B: [LOCK S2]-> A{--} B{TICK|SEND(LOCK,A)|SEND(LOCK,C)} C{--}
 B: [GETCLOCK]-> A{--} B{LC[10,12,8]} C{--}
 A: [RECEIVE]-> A{RECEIVE(LOCK,B)|TICK} B{--} C{--}
-C: [RECEIVE]-> A{--} B{--} C{RECEIVE(LOCK,B)|TICK|TICK|SEND(OK,B)}
+C: [RECEIVE]-> A{--} B{--} C{RECEIVE(LOCK,B)|TICK}
 # A libera los dos semaforos
 A: [UNLOCK S1]-> A{--} B{--} C{--}
 A: [UNLOCK S2]-> A{TICK|SEND(OK,C)|SEND(OK,B)} B{--} C{--}
-B: [RECEIVE]-> A{--} B{RECEIVE(OK,C)|TICK} C{--}
+B: [RECEIVE]-> A{--} B{RECEIVE(OK,A)|TICK} C{--}
 C: [RECEIVE]-> A{--} B{--} C{RECEIVE(OK,A)|TICK|MUTEX(S2)}
 # Entra C que estaba esperando con anterioridad.
-C: [UNLOCK S2]-> A{--} B{--} C{--}
+C: [UNLOCK S2]-> A{--} B{--} C{TICK|SEND(OK,B)}
 # C libera S2 y entra B
-B: [RECEIVE]-> A{--} B{RECEIVE(OK,A)|TICK|MUTEX(S2)} C{--}
+B: [RECEIVE]-> A{--} B{RECEIVE(OK,C)|TICK|MUTEX(S2)} C{--}
 B: [UNLOCK S2]-> A{--} B{--} C{--}

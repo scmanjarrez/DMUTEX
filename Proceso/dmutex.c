@@ -171,7 +171,7 @@ int main(int argc, char* argv[])
 		    }
 		  else
 		    {
-		      printf("me han pedido el lock %s y yo tengo lock.req=%d\n", msg->idLock, locks[lockIndex].req);
+		      /* printf("me han pedido el lock %s y yo tengo lock.req=%d\n", msg->idLock, locks[lockIndex].req); */
 		      /* if(!amIOlder(locks[lockIndex].req_lclk, pname)) */
 		      if(amIOlder(locks[lockIndex].req_lclk, pname)==0)
 			{
