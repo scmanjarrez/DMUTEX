@@ -9,7 +9,7 @@ int myIndex;
 char crit_sect[80];
 MUTEX *locks;
 int n_locks;
-/* char prueba[80]; */
+/* char prueba[80];*/
 
 int main(int argc, char* argv[])
 {
@@ -141,6 +141,7 @@ int main(int argc, char* argv[])
 	    case LOCK:
 	      printf("%s: RECEIVE(LOCK,%s)\n", peers[myIndex].id, pname);
 	      update_lclk(msg->lclk);
+	      /* print_lclk(); */
 	      
 	      lclk[myIndex]++;
 	      printf("%s: TICK\n", peers[myIndex].id);
@@ -164,6 +165,7 @@ int main(int argc, char* argv[])
 			{
 			  fprintf(stderr, "No se ha podido añadir a \"%s\" a la cola del lock \"%s\"", pname, msg->idLock);
 			  free(msg);
+			 
 			  free(lclk);
 			  free(peers);
 			  return -1;
@@ -171,11 +173,8 @@ int main(int argc, char* argv[])
 		    }
 		  else
 		    {
-		      /* printf("me han pedido el lock %s y yo tengo lock.req=%d\n", msg->idLock, locks[lockIndex].req); */
-		      /* if(!amIOlder(locks[lockIndex].req_lclk, pname)) */
-		      if(amIOlder(locks[lockIndex].req_lclk, pname)==0)
+		      if(prioridad(locks[lockIndex].req_lclk, msg->lclk, pname)==1)
 			{
-			  printf("enserio he entrado? wtf!\n");
 			  if(sendOkLockRequest(&info, pname, msg->idLock)==-1)
 			    {
 			      fprintf(stderr, "No se ha podido enviar OK a \"%s\"", pname);
@@ -197,29 +196,6 @@ int main(int argc, char* argv[])
 			    }
 			}
 		    }
-		  
-		  /* if(!amIOlder(locks[lockIndex].req_lclk, msg->lclk, pname) && !locks[lockIndex].inside) */
-		  /*   {	 */
-		  /*     if(sendOkLockRequest(&info, pname, msg->idLock)==-1) */
-		  /* 	{ */
-		  /* 	  fprintf(stderr, "No se ha podido enviar OK a \"%s\"", pname); */
-		  /* 	  free(msg); */
-		  /* 	  free(lclk); */
-		  /* 	  free(peers); */
-		  /* 	  return -1; */
-		  /* 	} */
-		  /*   } */
-		  /* else  */
-		  /*   { */
-		  /*     if(addToQueue(msg->idLock, pname)==-1) */
-		  /* 	{ */
-		  /* 	  fprintf(stderr, "No se ha podido añadir a \"%s\" a la cola del lock \"%s\"", pname, msg->idLock); */
-		  /* 	  free(msg); */
-		  /* 	  free(lclk); */
-		  /* 	  free(peers); */
-		  /* 	  return -1; */
-		  /* 	} */
-		  /*   } */
 		}
 	      break;
 	    case OK:
@@ -282,7 +258,6 @@ int main(int argc, char* argv[])
 	      return -1;
 	    }
       	}
-
     }
   free(lclk);
   free(peers);
@@ -335,7 +310,6 @@ int store_peer_sckt(const char *proc, const int port)
 
 int init_lclk(void)
 {
-
   if((lclk=calloc(n_peers, sizeof(int)))==NULL)
     {
       perror("Error");
@@ -620,35 +594,45 @@ int addToQueue(const char *idLock, const char* idPeer)
   return 0;
 }
 
-int amIOlder(const int *reqLClk, const char *id)
+int prioridad(const int *reqLClk, const int * msgLclk, const char *id)
 {
-  /* printf("soy %s y estoy comprobando si soy mayor\n", prueba); */
-  /* int j; */
-  /* for (j = 0; j<n_peers; j++) */
-  /*   { */
-  /*     printf("indice=%d, mioAntiguo=%d, mioActual=%d\n", j, reqLClk[j], lclk[j]); */
-  /*   } */
   int i;
+  int less=0;
+  int leq=0;
+  int gr=0;
+  int geq=0;
+
   for (i = 0; i<n_peers; i++)
     {
-      if(reqLClk[i]>lclk[i])
-	{
-	  return 0;
-	}
-      if(reqLClk[i]<lclk[i])
-	{
-	  return 1;
-	}
+      if (reqLClk[i] < msgLclk[i]) {
+	less++;
+      }
+      else if (reqLClk[i] > msgLclk[i]) {
+	gr++;
+      } 
+      if (reqLClk[i] <= msgLclk[i] || reqLClk[i] >= msgLclk[i] ) {
+	geq++;
+	leq++;
+      }
     }
+  if (less>1 && leq==n_peers) {
+    return 0;
+  }
+  else if (gr>1 && geq==n_peers) {
+    return 1;
+  }
 
-  int pIndex;
-  if((pIndex=getPeerIndex(id))==-1)
-    {
-      fprintf(stderr, "El proceso con id \"%s\" no se ha encontrado\n", id);
-      return -1;
-    }
-  /* printf("mi index es %d y el del otro es %d\n", myIndex, pIndex); */
-  return myIndex>pIndex? 0:1;
+  else {
+    int pIndex;
+    if((pIndex=getPeerIndex(id))==-1)
+      {
+	fprintf(stderr, "El proceso con id \"%s\" no se ha encontrado\n", id);
+	return -1;
+      }
+    printf("mi index es %d y el del otro es %d\n", myIndex, pIndex);
+    return myIndex<pIndex? 0:1;
+    
+  }
 }
 
 int remove_lock(const char *id)
@@ -788,14 +772,14 @@ int unlock(const INFO_SCKT *info, const char *idLock)
   memcpy(&(receiver.sin_addr), netdb->h_addr, netdb->h_length);
 
   if(locks[lockIndex].n_waiting)
-    {
-      /* Se genera un evento */
-      lclk[myIndex]++;
-      printf("%s: TICK\n", peers[myIndex].id);
-
+    {      
       int i, peerIndex;
       for(i=0; i<locks[lockIndex].n_waiting;i++)
 	{
+	  /* Se genera un evento */
+	  lclk[myIndex]++;
+	  printf("%s: TICK\n", peers[myIndex].id);
+
 	  if ((peerIndex=getPeerIndex(locks[lockIndex].waiting[i]))==-1)
 	    {
 	      fprintf(stderr, "No se ha encontrado el destinatario con id \"%s\"\n", locks[lockIndex].waiting[i]);
@@ -819,8 +803,7 @@ int unlock(const INFO_SCKT *info, const char *idLock)
 	      fprintf(stderr, "Error al enviar mensaje(OK) a %s\n", locks[lockIndex].waiting[i]);
 	      return -1;
 	    }
-	  printf("%s: SEND(OK,%s)\n",peers[myIndex].id, locks[lockIndex].waiting[i]);
-	  
+	  printf("%s: SEND(OK,%s)\n",peers[myIndex].id, locks[lockIndex].waiting[i]);	  
 	}
     }
 
