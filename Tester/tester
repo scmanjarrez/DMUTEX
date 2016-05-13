@@ -30,55 +30,17 @@ fin()
        INANICION INANICION2 MULTISEMAFORO
 }
 
-## Modo de uso:
-## ./tester [args...]
-## En caso de no pasar nada como argumento se ejecutarán todos los test,
-## en otro caso, se pasará el test indicado como parámetro.
-if [ "$1" == "--help" ]
-then
-    echo "Modo de uso: ./tester [args...]"
-    echo "En caso de no pasar nada como argumento se ejecutarán todos los test,"
-    echo "en otro caso, se pasará el test indicado como parámetro."
-    echo -e "Posibles argumentos:
-\tUNPROCESO, DOSPROCESOS, CUATROPROCESOS, UNOMISMO, DOSPROCESOS2
-\tPROTOCOLO1, PROTOCOLO2, PROTOCOLO3, PROTOCOLO_CONC, SENCILLO, CLISERV
-\tCLICLISERV, D_LENTO, MSG_Y_LOCK, SENCILLO1, SENCILLO2, PRIORIDAD_PID
-\tINANICION, INANICION2, MULTISEMAFORO"
-    fin
-    exit 0
-fi
-    
-declare -a tests=("UNPROCESO" "DOSPROCESOS" "CUATROPROCESOS" "UNOMISMO" "DOSPROCESOS2"\
-			      "PROTOCOLO1" "PROTOCOLO2" "PROTOCOLO3" "PROTOCOLO_CONC" "SENCILLO" "CLISERV"\
-			      "CLICLISERV" "D_LENTO" "MSG_Y_LOCK" "SENCILLO1" "SENCILLO2" "PRIORIDAD_PID"\
-			      "INANICION" "INANICION2" "MULTISEMAFORO")
-exists=false;
-
-for i in "${tests[@]}"; do
-    if [ "$1" == $i ]
-    then
-	exists=true
-	break
-    fi
-done
-
-if  [ -n "$1" ] && [ "$exists" = false ]
-then
-    echo -e "No se ha encontrado la prueba pasada como argumento\n"
-    fin
-    exit 0
-fi
-
 # Creamos los ficheros que vamos a usar para realizar el test al programa
-
-cat > UNPROCESO <<EOF
+crea_fich()
+{
+    cat > UNPROCESO <<EOF
 ALONE: EVENT
 ALONE: EVENT
 ALONE: EVENT
 ALONE: GETCLOCK
 EOF
 
-cat > DOSPROCESOS <<EOF
+    cat > DOSPROCESOS <<EOF
 FOO: EVENT
 FOO: EVENT
 BAA: EVENT
@@ -90,7 +52,7 @@ FOO: GETCLOCK
 BAA: GETCLOCK
 EOF
 
-cat > CUATROPROCESOS <<EOF
+    cat > CUATROPROCESOS <<EOF
 N: GETCLOCK
 S: GETCLOCK
 E: GETCLOCK
@@ -109,7 +71,7 @@ E: GETCLOCK
 W: GETCLOCK
 EOF
 
-cat > UNOMISMO <<EOF
+    cat > UNOMISMO <<EOF
 ALONE: EVENT
 ALONE: EVENT
 ALONE: EVENT
@@ -119,7 +81,7 @@ ALONE: RECEIVE
 ALONE: GETCLOCK
 EOF
 
-cat > DOSPROCESOS2 <<EOF
+    cat > DOSPROCESOS2 <<EOF
 SNDR: EVENT
 SNDR: EVENT
 RECV: EVENT
@@ -131,7 +93,7 @@ SNDR: GETCLOCK
 RECV: GETCLOCK
 EOF
 
-cat > PROTOCOLO1 <<EOF
+    cat > PROTOCOLO1 <<EOF
 SRV: GETCLOCK
 CLI: GETCLOCK
 # El cliente procesa un dato
@@ -152,7 +114,7 @@ SRV: GETCLOCK
 CLI: GETCLOCK
 EOF
 
-cat > PROTOCOLO2 <<EOF
+    cat > PROTOCOLO2 <<EOF
 SRV: GETCLOCK
 CL1: GETCLOCK
 CL2: GETCLOCK
@@ -180,7 +142,7 @@ CL1: GETCLOCK
 CL2: GETCLOCK
 EOF
 
-cat > PROTOCOLO3 <<EOF
+    cat > PROTOCOLO3 <<EOF
 CLI: GETCLOCK
 PROXY: GETCLOCK
 SRV: GETCLOCK
@@ -212,7 +174,7 @@ PROXY: GETCLOCK
 SRV: GETCLOCK
 EOF
 
-cat > PROTOCOLO_CONC <<EOF
+    cat > PROTOCOLO_CONC <<EOF
 SRV: GETCLOCK
 CL1: GETCLOCK
 CL2: GETCLOCK
@@ -240,7 +202,7 @@ CL1: GETCLOCK
 CL2: GETCLOCK
 EOF
 
-cat > SENCILLO <<EOF
+    cat > SENCILLO <<EOF
 A: LOCK CERROJO
 B: RECEIVE
 A: RECEIVE
@@ -248,7 +210,7 @@ A: RECEIVE
 A: UNLOCK CERROJO
 EOF
 
-cat > CLISERV <<EOF
+    cat > CLISERV <<EOF
 # El servidor es un recurso compartido, pero
 # sólo hay un cliente que lo solicite.
 # El semáforo que protege al servidor se denomina L
@@ -268,7 +230,7 @@ CLI: GETCLOCK
 SRV: GETCLOCK
 EOF
 
-cat > CLICLISERV <<EOF
+    cat > CLICLISERV <<EOF
 # El servidor es un recurso compartido, pero ahora
 # hay dos clientes que lo solicitan.
 # El semáforo que protege al servidor se denomina L
@@ -305,7 +267,7 @@ CL2: GETCLOCK
 SRV: GETCLOCK
 EOF
 
-cat > D_LENTO <<EOF
+    cat > D_LENTO <<EOF
 # El semáforo SEM protege una región crítica 
 # entre cuatro procesos. El proceso D tarda en
 # recibir los mensajes.
@@ -333,7 +295,7 @@ C: GETCLOCK
 D: GETCLOCK
 EOF
 
-cat > MSG_Y_LOCK <<EOF
+    cat > MSG_Y_LOCK <<EOF
 A: MESSAGETO B
 A: MESSAGETO C
 B: LOCK SEM
@@ -348,7 +310,7 @@ B: EVENT
 B: UNLOCK SEM
 EOF
 
-cat > SENCILLO1 <<EOF
+    cat > SENCILLO1 <<EOF
 A: LOCK CERROJO
 B: RECEIVE
 # B Solicita el cerrojo
@@ -362,7 +324,7 @@ B: RECEIVE
 B: UNLOCK CERROJO
 EOF
 
-cat > SENCILLO2 <<EOF
+    cat > SENCILLO2 <<EOF
 A: LOCK CERROJO
 B: RECEIVE
 A: RECEIVE
@@ -376,7 +338,7 @@ B: RECEIVE
 B: UNLOCK CERROJO
 EOF
 
-cat > PRIORIDAD_PID <<EOF
+    cat > PRIORIDAD_PID <<EOF
 A: MESSAGETO C
 B: MESSAGETO C
 C: RECEIVE
@@ -415,7 +377,7 @@ B: GETCLOCK
 C: GETCLOCK
 EOF
 
-cat > INANICION <<EOF
+    cat > INANICION <<EOF
 A: EVENT
 B: EVENT
 C: LOCK SEM
@@ -448,7 +410,7 @@ B: RECEIVE
 B: UNLOCK SEM
 EOF
 
-cat > INANICION2 <<EOF
+    cat > INANICION2 <<EOF
 A: EVENT
 B: EVENT
 C: LOCK SEM
@@ -489,7 +451,7 @@ B: RECEIVE
 B: UNLOCK SEM
 EOF
 
-cat > MULTISEMAFORO <<EOF
+    cat > MULTISEMAFORO <<EOF
 A: EVENT
 B: EVENT
 C: EVENT
@@ -542,8 +504,59 @@ C: UNLOCK S2
 B: RECEIVE
 B: UNLOCK S2
 EOF
+}
+
+## Modo de uso:
+## ./tester [args...]
+## En caso de no pasar nada como argumento se ejecutarán todos los test,
+## en otro caso, se pasará el test indicado como parámetro.
+if [ "$1" == "--help" ]
+then
+    echo "Modo de uso: ./tester [args...]"
+    echo "En caso de no pasar nada como argumento se ejecutarán todos los test,"
+    echo "en otro caso, se pasará el test indicado como parámetro."
+    echo -e "Posibles argumentos:
+\tUNPROCESO, DOSPROCESOS, CUATROPROCESOS, UNOMISMO, DOSPROCESOS2
+\tPROTOCOLO1, PROTOCOLO2, PROTOCOLO3, PROTOCOLO_CONC, SENCILLO, CLISERV
+\tCLICLISERV, D_LENTO, MSG_Y_LOCK, SENCILLO1, SENCILLO2, PRIORIDAD_PID
+\tINANICION, INANICION2, MULTISEMAFORO, --help, gen_fich"
+    fin
+    exit 0
+fi
+
+declare -a tests=("UNPROCESO" "DOSPROCESOS" "CUATROPROCESOS" "UNOMISMO" "DOSPROCESOS2"\
+			      "PROTOCOLO1" "PROTOCOLO2" "PROTOCOLO3" "PROTOCOLO_CONC" "SENCILLO" "CLISERV"\
+			      "CLICLISERV" "D_LENTO" "MSG_Y_LOCK" "SENCILLO1" "SENCILLO2" "PRIORIDAD_PID"\
+			      "INANICION" "INANICION2" "MULTISEMAFORO")
+
+if [ "$1" == "gen_fich" ]
+then
+    crea_fich
+    echo "Se han creado los ficheros de las pruebas en el directorio actual"
+    exit 0
+fi
+
+exists=false;
+
+for i in "${tests[@]}"; do
+    if [ "$1" == $i ]
+    then
+	exists=true
+	break
+    fi
+done
+
+if  [ -n "$1" ] && [ "$exists" = false ]
+then
+    echo -e "No se ha encontrado la prueba pasada como argumento\n"
+    fin
+    exit 0
+fi
 
 #################################################################################################
+## Preparamos los ficheros a usar
+crea_fich
+
 if [ -z $1 ] || [ "$1" == "UNPROCESO" ]
 then
     test_run ./controlador UNPROCESO

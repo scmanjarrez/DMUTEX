@@ -9,7 +9,6 @@ int myIndex;
 char crit_sect[80];
 MUTEX *locks;
 int n_locks;
-/* char prueba[80];*/
 
 int main(int argc, char* argv[])
 {
@@ -65,8 +64,6 @@ int main(int argc, char* argv[])
       if(!strcmp(proc,argv[1]))
 	{
 	  myIndex = n_peers;
-	  /* printf("%s-%s: myIndex es %d\n", proc, argv[1], myIndex); */
-	  /* strcpy(prueba, proc); */
 	}
 
       if(store_peer_sckt(proc, port)==-1)
@@ -84,10 +81,6 @@ int main(int argc, char* argv[])
       free(peers);
       return -1;
     }
-  /* int i; */
-  /* for (i = 0; i < n_peers; i++) { */
-  /*   printf("indice=%d, id=%s, puerto=%d\n", i, peers[i].id, peers[i].port); */
-  /* } */
   
   /* Inicializar Reloj */
   if(init_lclk()==-1)
@@ -141,7 +134,6 @@ int main(int argc, char* argv[])
 	    case LOCK:
 	      printf("%s: RECEIVE(LOCK,%s)\n", peers[myIndex].id, pname);
 	      update_lclk(msg->lclk);
-	      /* print_lclk(); */
 	      
 	      lclk[myIndex]++;
 	      printf("%s: TICK\n", peers[myIndex].id);
@@ -219,6 +211,7 @@ int main(int argc, char* argv[])
 		  printf("%s: MUTEX(%s)\n", peers[myIndex].id, msg->idLock);
 		}
 	    }
+	  free(msg);
 	}       
 
       if(!strcmp(line,"FINISH\n"))
@@ -656,7 +649,7 @@ int remove_lock(const char *id)
       memmove(temp, locks, (lockIndex)*sizeof(MUTEX));
       memmove(temp+lockIndex, locks+lockIndex+1, (n_locks-lockIndex-1)*sizeof(MUTEX));
     }
-  
+  free(locks[lockIndex].req_lclk);
   free(locks[lockIndex].waiting);
   free(locks);
   n_locks--;
