@@ -516,11 +516,11 @@ then
     echo "En caso de no pasar nada como argumento se ejecutarán todos los test,"
     echo "en otro caso, se pasará el test indicado como parámetro."
     echo -e "Posibles argumentos:
+\t--help, gen_fich , clean
 \tUNPROCESO, DOSPROCESOS, CUATROPROCESOS, UNOMISMO, DOSPROCESOS2
 \tPROTOCOLO1, PROTOCOLO2, PROTOCOLO3, PROTOCOLO_CONC, SENCILLO, CLISERV
 \tCLICLISERV, D_LENTO, MSG_Y_LOCK, SENCILLO1, SENCILLO2, PRIORIDAD_PID
-\tINANICION, INANICION2, MULTISEMAFORO, --help, gen_fich"
-    fin
+\tINANICION, INANICION2, MULTISEMAFORO"
     exit 0
 fi
 
@@ -535,6 +535,14 @@ then
     echo "Se han creado los ficheros de las pruebas en el directorio actual"
     exit 0
 fi
+
+if [ "$1" == "clean" ]
+then
+    fin
+    echo "Se han limpiado los ficheros residuales"
+    exit 0
+fi
+
 
 exists=false;
 
